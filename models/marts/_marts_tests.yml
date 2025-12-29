@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "Customer dimension built from stg_customers."
+    columns:
+      - name: customer_id
+        description: "Customer primary key."
+        tests:
+          - not_null
+          - unique
+
+  - name: fct_orders
+    description: "Orders fact table built from int_orders_enriched. One row per order_id."
+    columns:
+      - name: order_id
+        description: "Order primary key."
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Customer foreign key. Must exist in dim_customers.customer_id."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+
+      - name: order_status
+        description: "Order lifecycle status."
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - created
+                - approved
+                - processing
+                - invoiced
+                - shipped
+                - delivered
+                - canceled
+                - unavailable

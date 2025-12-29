@@ -1,0 +1,16 @@
+version: 2
+
+seeds:
+  - name: order_status_map
+    description: "Reference mapping from order_status to a reporting-friendly status_group."
+    columns:
+      - name: order_status
+        description: "Raw order status value."
+        tests:
+          - not_null
+          - unique
+
+      - name: status_group
+        description: "High-level grouping used for reporting."
+        tests:
+          - not_null
