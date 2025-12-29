@@ -2,15 +2,123 @@ version: 2
 
 sources:
   - name: olist
+    database: OLIST
     schema: RAW
+    description: "Raw Olist tables loaded into Snowflake. These tables are upstream inputs and are not transformed by dbt."
+
     tables:
       - name: customers
         identifier: CUSTOMERS
+        description: "One row per customer."
+        columns:
+          - name: customer_id
+            description: "Customer primary key."
+            tests:
+              - not_null
+              - unique
+
+          - name: customer_unique_id
+            description: "Stable customer identifier across multiple orders."
+
       - name: orders
         identifier: ORDERS
+        description: "One row per order. Contains lifecycle timestamps and status."
+
+        loaded_at_field: order_purchase_timestamp
+        freshness:
+          warn_after: {count: 4000, period: day}
+          error_after: {count: 7000, period: day}
+
+        columns:
+          - name: order_id
+            description: "Order primary key."
+            tests:
+              - not_null
+              - unique
+
+          - name: customer_id
+            description: "Customer placing the order. Joins to customers.customer_id."
+            tests:
+              - not_null
+              - relationships:
+                  to: source('olist', 'customers')
+                  field: customer_id
+
+          - name: order_status
+            description: "Order lifecycle status from the source system."
+            tests:
+              - not_null
+              - accepted_values:
+                  values:
+                    - created
+                    - approved
+                    - processing
+                    - invoiced
+                    - shipped
+                    - delivered
+                    - canceled
+                    - unavailable
+
+          - name: order_purchase_timestamp
+            description: "Timestamp when the purchase was placed. Used as a proxy for load time in this training repo."
+
       - name: order_items
         identifier: ORDER_ITEMS
+        description: "Line items for orders. Multiple rows per order_id."
+
+        loaded_at_field: shipping_limit_date
+        freshness:
+          warn_after: {count: 4000, period: day}
+          error_after: {count: 7000, period: day}
+
+        columns:
+          - name: order_id
+            description: "Order key. Joins to orders.order_id."
+            tests:
+              - not_null
+              - relationships:
+                  to: source('olist', 'orders')
+                  field: order_id
+
+          - name: order_item_id
+            description: "Line number within the order."
+            tests:
+              - not_null
+
+          - name: product_id
+            description: "Product key. Joins to products.product_id."
+            tests:
+              - not_null
+              - relationships:
+                  to: source('olist', 'products')
+                  field: product_id
+
       - name: payments
         identifier: PAYMENTS
+        description: "Payment records for orders. Multiple rows per order_id when there are multiple payment attempts."
+        columns:
+          - name: order_id
+            description: "Order key. Joins to orders.order_id."
+            tests:
+              - not_null
+              - relationships:
+                  to: source('olist', 'orders')
+                  field: order_id
+
+          - name: payment_sequential
+            description: "Payment sequence number within an order."
+            tests:
+              - not_null
+
       - name: products
         identifier: PRODUCTS
+        description: "Product catalog table."
+        columns:
+          - name: product_id
+            description: "Product primary key."
+            tests:
+              - not_null
+              - unique
+
+          - name: product_category_name
+            description: "Product category label from the source system."
