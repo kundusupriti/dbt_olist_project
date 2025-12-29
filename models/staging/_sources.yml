@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: olist
+    schema: RAW
+    tables:
+      - name: customers
+        identifier: CUSTOMERS
+      - name: orders
+        identifier: ORDERS
+      - name: order_items
+        identifier: ORDER_ITEMS
+      - name: payments
+        identifier: PAYMENTS
+      - name: products
+        identifier: PRODUCTS
