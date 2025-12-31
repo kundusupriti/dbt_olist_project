@@ -1,7 +1,7 @@
-select
+SELECT
   customer_id,
   customer_unique_id,
-  cast(customer_zip_code_prefix as number) as customer_zip_code_prefix,
-  lower(trim(customer_city)) as customer_city,
-  upper(trim(customer_state)) as customer_state
-from {{ source('olist', 'customers') }}
+  CAST(customer_zip_code_prefix AS NUMBER) AS customer_zip_code_prefix,
+  {{ clean_string('customer_city') }} AS customer_city,
+  {{ clean_string('customer_state', 'upper') }} AS customer_state
+FROM {{ source('olist', 'customers') }}

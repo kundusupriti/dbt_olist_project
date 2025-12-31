@@ -3,7 +3,8 @@
     materialized='incremental',
     incremental_strategy='merge',
     unique_key='order_id',
-    on_schema_change='sync_all_columns'
+    on_schema_change='sync_all_columns',
+    post_hook=["GRANT SELECT ON {{ this }} TO ROLE OLIST_ROLE"]
   )
 }}
 
@@ -41,6 +42,7 @@ WITH orders_enriched AS (
 SELECT
     order_id,
     customer_id,
+    {{ dbt_utils.generate_surrogate_key(['order_id', 'customer_id']) }} AS order_customer_key,
     order_status,
     order_purchase_ts,
     order_approved_ts,

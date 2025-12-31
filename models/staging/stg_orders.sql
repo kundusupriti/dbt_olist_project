@@ -1,10 +1,10 @@
-select
+SELECT
   order_id,
   customer_id,
-  lower(trim(order_status)) as order_status,
-  cast(order_purchase_timestamp as timestamp) as order_purchase_ts,
-  cast(order_approved_at as timestamp) as order_approved_ts,
-  cast(order_delivered_carrier_date as timestamp) as order_delivered_carrier_ts,
-  cast(order_delivered_customer_date as timestamp) as order_delivered_customer_ts,
-  cast(order_estimated_delivery_date as date) as order_estimated_delivery_date
-from {{ source('olist', 'orders') }}
+  {{ clean_string('order_status') }} AS order_status,
+  CAST(order_purchase_timestamp AS TIMESTAMP) AS order_purchase_ts,
+  CAST(order_approved_at AS TIMESTAMP) AS order_approved_ts,
+  CAST(order_delivered_carrier_date AS TIMESTAMP) AS order_delivered_carrier_ts,
+  CAST(order_delivered_customer_date AS TIMESTAMP) AS order_delivered_customer_ts,
+  CAST(order_estimated_delivery_date AS DATE) AS order_estimated_delivery_date
+FROM {{ source('olist', 'orders') }}
