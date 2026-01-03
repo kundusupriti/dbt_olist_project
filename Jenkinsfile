@@ -63,7 +63,7 @@ dbt_olist_project:
       role: "{{ env_var('SNOWFLAKE_ROLE') }}"
       warehouse: "COMPUTE_WH"
       database: "OLIST"
-      schema: "OLIST_PROD"
+      schema: "ANALYTICS_CI"
       threads: 4
 YAML
 
